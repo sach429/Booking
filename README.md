@@ -35,6 +35,8 @@ If running spring boot app in default 8080 port then
 
 Swagger: http://localhost:8080/api/swagger-ui.html
 
+Sample test files in src/test/resources
+
 ###Scenarios
 
 Create a Booking

@@ -20,7 +20,9 @@ There are no restrictions on how reservations are stored as as long as system co
 
 ###Pre-requisites
 OpenJDK 1.8+
+
 MongoDB 4.0+
+
 Docker 19.0+ (Optional)
 
 ###Setup

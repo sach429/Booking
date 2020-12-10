@@ -12,7 +12,9 @@ import com.sach429.booking.utils.BookingUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +30,19 @@ public class BookingService {
     }
 
     public List<Booking> getBookings(String email, String fromDate, String toDate, Booking.BookingStatus status) {
-        return Optional.ofNullable(bookingPersistenceService.getBookings(new Booking(null, email, BookingUtils.convertStringToLocalDate(fromDate), BookingUtils.convertStringToLocalDate(toDate), status)))
+        LocalDate localFromDate = null;
+        try {
+            localFromDate = Optional.ofNullable(fromDate).map(BookingUtils::convertStringToLocalDate).orElse(null);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+        LocalDate localToDate = null;
+        try {
+            localToDate = Optional.ofNullable(toDate).map(BookingUtils::convertStringToLocalDate).orElse(null);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+        return Optional.ofNullable(bookingPersistenceService.getBookings(new Booking(null, email, localFromDate, localToDate, status)))
                 .orElseGet(ArrayList::new);
     }
 

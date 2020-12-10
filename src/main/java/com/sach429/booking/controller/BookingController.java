@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -47,7 +48,7 @@ public class BookingController {
     }
 
     @PostMapping(path = "/bookings", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Booking createBooking(@Valid @RequestBody BookingCreate bookingCreate) throws BookingCreationException {
+    public Booking createBooking(@Validated @RequestBody BookingCreate bookingCreate) throws BookingCreationException {
         try {
             BookingController.transactionId.set(bookingService.getTransactionId());
             return bookingService.createBooking(bookingCreate);
@@ -57,7 +58,7 @@ public class BookingController {
     }
 
     @PutMapping(path = "/bookings/{bookingId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Booking modifyBooking(@Valid @RequestBody BookingModify bookingModify, @NonNull @PathVariable("bookingId") Long bookingId) throws BookingModifyException {
+    public Booking modifyBooking(@Validated @RequestBody BookingModify bookingModify, @NonNull @PathVariable("bookingId") Long bookingId) throws BookingModifyException {
         try {
             BookingController.transactionId.set(bookingService.getTransactionId());
             return bookingService.modifyBooking(bookingModify, bookingId);

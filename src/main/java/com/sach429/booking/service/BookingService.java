@@ -1,9 +1,10 @@
 package com.sach429.booking.service;
 
+import com.mongodb.DuplicateKeyException;
 import com.sach429.booking.exception.BookingCreationException;
+import com.sach429.booking.exception.BookingDateNotAvailableException;
 import com.sach429.booking.exception.BookingModifyException;
 import com.sach429.booking.exception.BookingNotFoundException;
-import com.sach429.booking.exception.BookingValidationException;
 import com.sach429.booking.model.Booking;
 import com.sach429.booking.types.BookingCreate;
 import com.sach429.booking.types.BookingModify;
@@ -35,7 +36,9 @@ public class BookingService {
         try {
             bookingValidationService.validateBookingRequestIsValid(bookingCreate);
             return bookingPersistenceService.createBooking(bookingCreate);
-        } catch (BookingValidationException e) {
+        } catch (DuplicateKeyException e) {
+            throw new BookingCreationException(new BookingDateNotAvailableException("Booking dates not available"));
+        } catch (Exception e) {
             throw new BookingCreationException(e);
         }
     }
@@ -48,7 +51,9 @@ public class BookingService {
             else if (bookingModify.getAction() == BookingModify.ActionType.CANCEL)
                 return bookingPersistenceService.cancelBooking(bookingModify, bookingId);
             else return null;
-        } catch (BookingValidationException e) {
+        } catch (DuplicateKeyException e) {
+            throw new BookingModifyException(new BookingDateNotAvailableException("Booking dates not available"));
+        } catch (Exception e) {
             throw new BookingModifyException(e);
         }
     }

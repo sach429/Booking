@@ -49,20 +49,20 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.2.32</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.jsonschema2pojo</groupId>
                 <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-                <version>1.0.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.jsonschema2pojo</groupId>
-                <artifactId>jsonschema2pojo-maven-plugin</artifactId>
                 <configuration>
                     <sourceDirectory>${basedir}/src/main/resources/schema/booking</sourceDirectory>
                     <targetPackage>com.sach429.booking.types</targetPackage>
+                    <includeJsr303Annotations>true</includeJsr303Annotations>
                 </configuration>
                 <executions>
                     <execution>

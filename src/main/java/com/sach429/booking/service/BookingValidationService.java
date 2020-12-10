@@ -1,9 +1,6 @@
 package com.sach429.booking.service;
 
-import com.sach429.booking.exception.BookingAlreadyCancelledException;
-import com.sach429.booking.exception.BookingDatesInvalidException;
-import com.sach429.booking.exception.BookingNotFoundException;
-import com.sach429.booking.exception.BookingValidationException;
+import com.sach429.booking.exception.*;
 import com.sach429.booking.model.Booking;
 import com.sach429.booking.properties.BookingConfigurationProperties;
 import com.sach429.booking.types.BookingCreate;
@@ -11,7 +8,6 @@ import com.sach429.booking.types.BookingModify;
 import com.sach429.booking.utils.BookingUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,7 +24,7 @@ public class BookingValidationService {
                 .orElseThrow(() -> new BookingNotFoundException("BookingId: " + bookingId + " is not found"));
     }
 
-    public void validateBookingIsConfirmedAndNotInProgress(Long bookingId) throws BookingAlreadyCancelledException, BookingNotFoundException {
+    public void validateBookingIsConfirmedAndNotInProgress(Long bookingId) throws BookingAlreadyCancelledException, BookingNotFoundException, BookingAlreadyInProgressException {
         Booking booking = bookingPersistenceService.getBooking(bookingId);
         Optional.ofNullable(booking)
                 .map(Booking::getBookingStatus)
@@ -37,7 +33,7 @@ public class BookingValidationService {
         Optional.of(booking)
                 .map(Booking::getFromDate)
                 .filter(LocalDate.now()::isAfter)
-                .orElseThrow(()->new BookingALreadyInProgressException("Booking is already in progress and cannot be modified"))
+                .orElseThrow(() -> new BookingAlreadyInProgressException("Booking is already in progress and cannot be modified"));
     }
 
     public void validateBookingRequestIsValid(BookingCreate bookingCreate) throws BookingValidationException {

@@ -10,10 +10,39 @@ Reservations can be cancelled anytime.
 For sake of simplicity assume the check-in & check-out time is 12:00 AM 
 
 
-#System Requirements 
+###System Requirements 
 
 The users will need to find out when the campsite is available. So the system should expose an API to provide information of the availability of the campsite for a given date range with the default being 1 month. 
 Provide an end point for reserving the campsite. The user will provide his/her email & full name at the time of reserving the campsite along with intended arrival date and departure date. Return a unique booking identifier back to the caller if the reservation is successful. The unique booking identifier can be used to modify or cancel the reservation later on. Provide appropriate end point(s) to allow modification/cancellation of an existing reservation 
 Due to the popularity of the island, there is a high likelihood of multiple users attempting to reserve the campsite for the same/overlapping date(s). Demonstrate with appropriate test cases that the system can gracefully handle concurrent requests to reserve the campsite. Provide appropriate error messages to the caller to indicate the error cases. 
 In general, the system should be able to handle large volume of requests for getting the campsite availability. 
 There are no restrictions on how reservations are stored as as long as system constraints are not violated.
+
+###Pre-requisites
+OpenJDK 1.8+
+MongoDB 4.0+
+Docker 19.0+ (Optional)
+
+###Setup
+A running MongoDB server instance. If you want to run MongoDB locally you may run it as a docker container; follow https://github.com/bitnami/bitnami-docker-mongodb
+
+Change env var spring.data.mongodb.uri accordingly
+
+
+###Testing
+
+If running spring boot app in default 8080 port then
+
+Swagger: http://localhost:8080/api/swagger-ui.html
+
+###Scenarios
+
+Create a Booking
+
+Modify a Booking
+
+Fetch a booking or list of bookings
+
+###Additional System Constraints
+
+A booking cannot be modified if it's already cancelled or if it's already in progress ie. the current booking start date is less or equal to current date

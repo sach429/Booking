@@ -60,7 +60,7 @@ public class BookingValidationService {
 //        check if fromDate is before toDate and number of days between is less than max duration
 //        check if fromDate is between minDaysInAdvance and maxDaysInAdvance
         Optional.ofNullable(fromLocalDate)
-                .filter(date -> date.isBefore(toLocalDate))
+                .filter(date -> date.isBefore(toLocalDate) || date.isEqual(toLocalDate))
                 .filter(date -> date.until(toLocalDate).getDays() <= bookingConfigurationProperties.getMaxDuration() - 1)
                 .filter(date -> LocalDate.now().until(fromLocalDate).getDays() >= bookingConfigurationProperties.getMinDaysInAdvance())
                 .filter(date -> fromLocalDate.plusDays(bookingConfigurationProperties.getMaxDaysInAdvance()).until(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())).getDays() <= 0)

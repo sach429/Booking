@@ -1,6 +1,5 @@
 package com.sach429.booking.service;
 
-import com.mongodb.DuplicateKeyException;
 import com.sach429.booking.exception.BookingCreationException;
 import com.sach429.booking.exception.BookingDateNotAvailableException;
 import com.sach429.booking.exception.BookingModifyException;
@@ -10,6 +9,7 @@ import com.sach429.booking.types.BookingCreate;
 import com.sach429.booking.types.BookingModify;
 import com.sach429.booking.utils.BookingUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

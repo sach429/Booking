@@ -35,7 +35,7 @@ Change env var spring.data.mongodb.uri accordingly
 
 If running spring boot app in default 8080 port then
 
-Swagger: http://localhost:8080/swagger-ui/index.html
+Swagger: http://localhost:8080/swagger-ui.html
 
 Sample test files in src/test/resources
 

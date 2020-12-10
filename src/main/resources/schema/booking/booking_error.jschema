@@ -1,0 +1,30 @@
+{
+  "$id": "https://sach429.com/booking_modify.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Booking create schema",
+  "type": "object",
+  "definitions": {
+    "error": {
+      "$ref": "#/definitions/errorType"
+    },
+    "errorType": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "transactionId": {
+      "type": "string"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/error"
+      }
+    }
+  }
+}

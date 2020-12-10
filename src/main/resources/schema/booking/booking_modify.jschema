@@ -1,0 +1,61 @@
+{
+  "$id": "https://sach429.com/booking_modify.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Booking modify schema",
+  "type": "object",
+  "properties": {
+    "fromDate": {
+      "type": "string"
+    },
+    "toDate": {
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/definitions/actionType"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "fromDate",
+    "toDate"
+  ],
+  "oneOf": [
+    {
+      "properties": {
+        "action": {
+          "enum": [
+            "modify"
+          ]
+        }
+      },
+      "required": [
+        "fromDate",
+        "toDate"
+      ]
+    },
+    {
+      "properties": {
+        "action": {
+          "enum": [
+            "cancel"
+          ]
+        }
+      },
+      "required": [
+        "fromDate",
+        "toDate"
+      ]
+    }
+  ],
+  "definitions": {
+    "actionType": {
+      "type": "string",
+      "enum": [
+        "modify",
+        "cancel"
+      ]
+    }
+  }
+}

@@ -10,7 +10,7 @@ Reservations can be cancelled anytime.
 For sake of simplicity assume the check-in & check-out time is 12:00 AM 
 
 
-##System Requirements 
+#System Requirements 
 
 The users will need to find out when the campsite is available. So the system should expose an API to provide information of the availability of the campsite for a given date range with the default being 1 month. 
 Provide an end point for reserving the campsite. The user will provide his/her email & full name at the time of reserving the campsite along with intended arrival date and departure date. Return a unique booking identifier back to the caller if the reservation is successful. The unique booking identifier can be used to modify or cancel the reservation later on. Provide appropriate end point(s) to allow modification/cancellation of an existing reservation 

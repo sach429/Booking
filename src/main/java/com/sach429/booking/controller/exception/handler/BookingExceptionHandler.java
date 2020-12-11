@@ -23,10 +23,9 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BookingCreationException.class)
     public ResponseEntity<BookingError> handleBookingCreationException(BookingCreationException bookingCreationException) {
-        BinaryExceptionClassifier binaryExceptionClassifier = new BinaryExceptionClassifier(Arrays.asList(BookingValidationException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingCreationException)) {
-            return handleBookingValidationException(BookingValidationException.class.cast(ExceptionUtils.getRootCause(bookingCreationException)));
+        BookingValidationException rootCause = ExceptionUtils.throwableOfThrowable(bookingCreationException, BookingValidationException.class);
+        if (rootCause != null) {
+            return handleBookingValidationException(rootCause);
         }
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
@@ -36,31 +35,26 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(bookingError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<BookingError> handleBookingValidationException(BookingValidationException bookingValidationException) {
-        BinaryExceptionClassifier binaryExceptionClassifier = new BinaryExceptionClassifier(Arrays.asList(BookingDateNotAvailableException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingValidationException)) {
-            return handleBookingDateNotAvailable((BookingDateNotAvailableException) ExceptionUtils.getRootCause(bookingValidationException));
+    public ResponseEntity<BookingError> handleBookingValidationException(BookingValidationException bookingValidationException) {
+        BookingDateNotAvailableException bookingDateNotAvailableException = ExceptionUtils.throwableOfThrowable(bookingValidationException, BookingDateNotAvailableException.class);
+        if (bookingDateNotAvailableException != null) {
+            return handleBookingDateNotAvailable(bookingDateNotAvailableException);
         }
-        binaryExceptionClassifier = new BinaryExceptionClassifier(Collections.singletonList(BookingDatesInvalidException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingValidationException)) {
-            return handleBookingDatesInvalid((BookingDatesInvalidException) ExceptionUtils.getRootCause(bookingValidationException));
+        BookingDatesInvalidException bookingDatesInvalidException = ExceptionUtils.throwableOfThrowable(bookingValidationException, BookingDatesInvalidException.class);
+        if (bookingDatesInvalidException != null) {
+            return handleBookingDatesInvalid(bookingDatesInvalidException);
         }
-        binaryExceptionClassifier = new BinaryExceptionClassifier(Collections.singletonList(BookingNotFoundException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingValidationException)) {
-            return handleBookingNotFoundException((BookingNotFoundException) ExceptionUtils.getRootCause(bookingValidationException));
+        BookingNotFoundException BookingNotFoundException = ExceptionUtils.throwableOfThrowable(bookingValidationException, BookingNotFoundException.class);
+        if (BookingNotFoundException != null) {
+            return handleBookingNotFoundException(BookingNotFoundException);
         }
-        binaryExceptionClassifier = new BinaryExceptionClassifier(Collections.singletonList(BookingAlreadyCancelledException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingValidationException)) {
-            return handleBookingAlreadyCancelled((BookingAlreadyCancelledException) ExceptionUtils.getRootCause(bookingValidationException));
+        BookingAlreadyCancelledException bookingAlreadyCancelledException = ExceptionUtils.throwableOfThrowable(bookingValidationException, BookingAlreadyCancelledException.class);
+        if (bookingAlreadyCancelledException != null) {
+            return handleBookingAlreadyCancelled(bookingAlreadyCancelledException);
         }
-        binaryExceptionClassifier = new BinaryExceptionClassifier(Collections.singletonList(BookingAlreadyInProgressException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingValidationException)) {
-            return handleBookingAlreadyInProgress((BookingAlreadyInProgressException) ExceptionUtils.getRootCause(bookingValidationException));
+        BookingAlreadyInProgressException bookingAlreadyInProgressException = ExceptionUtils.throwableOfThrowable(bookingValidationException, BookingAlreadyInProgressException.class);
+        if (bookingAlreadyInProgressException != null) {
+            return handleBookingAlreadyInProgress(bookingAlreadyInProgressException);
         }
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
@@ -70,7 +64,8 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(bookingError, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<BookingError> handleBookingAlreadyInProgress(BookingAlreadyInProgressException bookingAlreadyInProgressException) {
+    @ExceptionHandler(BookingAlreadyInProgressException.class)
+    public ResponseEntity<BookingError> handleBookingAlreadyInProgress(BookingAlreadyInProgressException bookingAlreadyInProgressException) {
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
         ErrorType errorType = new ErrorType();
@@ -79,7 +74,8 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(bookingError, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<BookingError> handleBookingAlreadyCancelled(BookingAlreadyCancelledException bookingAlreadyCancelledException) {
+    @ExceptionHandler(BookingAlreadyCancelledException.class)
+    public ResponseEntity<BookingError> handleBookingAlreadyCancelled(BookingAlreadyCancelledException bookingAlreadyCancelledException) {
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
         ErrorType errorType = new ErrorType();
@@ -88,7 +84,8 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(bookingError, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<BookingError> handleBookingDatesInvalid(BookingDatesInvalidException bookingDatesInvalidException) {
+    @ExceptionHandler(BookingDatesInvalidException.class)
+    public ResponseEntity<BookingError> handleBookingDatesInvalid(BookingDatesInvalidException bookingDatesInvalidException) {
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
         ErrorType errorType = new ErrorType();
@@ -98,7 +95,8 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
 
     }
 
-    private ResponseEntity<BookingError> handleBookingDateNotAvailable(BookingDateNotAvailableException bookingDateNotAvailableException) {
+    @ExceptionHandler(BookingDateNotAvailableException.class)
+    public ResponseEntity<BookingError> handleBookingDateNotAvailable(BookingDateNotAvailableException bookingDateNotAvailableException) {
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
         ErrorType errorType = new ErrorType();
@@ -111,8 +109,9 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<BookingError> handleBookingModifyException(BookingModifyException bookingModifyException) {
         BinaryExceptionClassifier binaryExceptionClassifier = new BinaryExceptionClassifier(Arrays.asList(BookingValidationException.class));
         binaryExceptionClassifier.setTraverseCauses(true);
-        if (binaryExceptionClassifier.classify(bookingModifyException)) {
-            return handleBookingValidationException(BookingValidationException.class.cast(ExceptionUtils.getRootCause(bookingModifyException)));
+        BookingValidationException bookingValidationException = ExceptionUtils.throwableOfThrowable(bookingModifyException, BookingValidationException.class);
+        if (bookingValidationException != null) {
+            return handleBookingValidationException(bookingValidationException);
         }
         BookingError bookingError = new BookingError();
         bookingError.setTransactionId(BookingController.transactionId.get());
@@ -147,6 +146,6 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorType errorType = new ErrorType();
         errorType.setDescription(bookingCreationException.getMessage());
         bookingError.setErrors(Collections.singletonList(errorType));
-        return new ResponseEntity<BookingError>(bookingError, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(bookingError, HttpStatus.NOT_FOUND);
     }
 }

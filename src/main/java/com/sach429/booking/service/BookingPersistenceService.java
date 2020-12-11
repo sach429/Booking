@@ -6,6 +6,7 @@ import com.sach429.booking.repository.BookingRepository;
 import com.sach429.booking.types.BookingCreate;
 import com.sach429.booking.types.BookingModify;
 import com.sach429.booking.utils.BookingUtils;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
+@RequiredArgsConstructor
 public class BookingPersistenceService {
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
     public static final String FROM_DATE = "fromDate";
@@ -34,11 +36,7 @@ public class BookingPersistenceService {
     public static final String CANCELLATION_REASON = "cancellationReason";
     private final BookingRepository bookingRepository;
     private final MongoTemplate mongoTemplate;
-
-    BookingPersistenceService(BookingRepository bookingRepository, MongoTemplate mongoTemplate) {
-        this.bookingRepository = bookingRepository;
-        this.mongoTemplate = mongoTemplate;
-    }
+    private final BookingIdGenerationService bookingIdGenerationService;
 
     public Booking getBooking(Long id) throws BookingNotFoundException {
         return Optional.ofNullable(bookingRepository.getBookingByBookingId(id)).orElseThrow(() -> new BookingNotFoundException("BookingId: " + id + " cannot be found"));
@@ -64,11 +62,11 @@ public class BookingPersistenceService {
     }
 
     public Booking createBooking(BookingCreate bookingCreate) {
-        Long bookingId = generateBookingId();
+        Long bookingId = bookingIdGenerationService.generateBookingId();
         LocalDate fromDate = BookingUtils.convertStringToLocalDate(bookingCreate.getFromDate());
         LocalDate toDate = BookingUtils.convertStringToLocalDate(bookingCreate.getToDate());
         List<String> days = getListOfDaysBetweenFromAndToDate(fromDate, toDate);
-        Booking booking = new Booking(bookingId, bookingCreate.getEmail(), fromDate, toDate, Booking.BookingStatus.CONFIRMED);
+        Booking booking = new Booking(bookingId, bookingCreate.getFirstName(), bookingCreate.getLastName(), bookingCreate.getEmail(), fromDate, toDate, Booking.BookingStatus.CONFIRMED);
         booking.setDays(days);
         bookingRepository.save(booking);
         return booking;
@@ -94,12 +92,6 @@ public class BookingPersistenceService {
                                 .where(BOOKING_ID).
                                         is(bookingId).andOperator(Criteria.where(BOOKING_STATUS).is(Booking.BookingStatus.CONFIRMED))),
                 update, FindAndModifyOptions.options().returnNew(true), Booking.class);
-    }
-
-    public Long generateBookingId() {
-        Update update = new Update();
-        update.inc(BOOKING_ID);
-        return mongoTemplate.findAndModify(new Query(), update, FindAndModifyOptions.options().returnNew(true).upsert(true), Document.class, "bookingSequence").get(BOOKING_ID, Long.class);
     }
 
     public Booking cancelBooking(BookingModify bookingModify, Long bookingId) {

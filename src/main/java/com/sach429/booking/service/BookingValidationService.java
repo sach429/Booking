@@ -62,8 +62,8 @@ public class BookingValidationService {
         Optional.ofNullable(fromLocalDate)
                 .filter(date -> date.isBefore(toLocalDate) || date.isEqual(toLocalDate))
                 .filter(date -> date.until(toLocalDate).getDays() <= bookingConfigurationProperties.getMaxDuration() - 1)
-                .filter(date -> LocalDate.now().until(fromLocalDate).getDays() >= bookingConfigurationProperties.getMinDaysInAdvance())
-                .filter(date -> fromLocalDate.plusDays(bookingConfigurationProperties.getMaxDaysInAdvance()).until(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())).getDays() <= 0)
+                .filter(date -> LocalDate.now().isAfter(date.plusDays(bookingConfigurationProperties.getMinDaysInAdvance())) || LocalDate.now().isEqual(date.plusDays(bookingConfigurationProperties.getMinDaysInAdvance())))
+                .filter(date -> date.isBefore(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())) || date.isEqual(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())))
                 .orElseThrow(() -> new BookingDatesInvalidException("Booking Dates not in range"));
     }
 

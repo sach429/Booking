@@ -42,7 +42,7 @@ public class BookingService {
         } catch (Exception e) {
             return Collections.emptyList();
         }
-        return Optional.ofNullable(bookingPersistenceService.getBookings(new Booking(null, email, localFromDate, localToDate, status)))
+        return Optional.ofNullable(bookingPersistenceService.getBookings(new Booking(null, null, null, email, localFromDate, localToDate, status)))
                 .orElseGet(ArrayList::new);
     }
 

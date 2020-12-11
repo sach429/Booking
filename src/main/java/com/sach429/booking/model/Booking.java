@@ -18,9 +18,14 @@ import java.util.List;
         alphabetic = true
 )
 public class Booking {
-
     @JsonProperty
     private final Long bookingId;
+
+    @JsonProperty
+    private final String firstName;
+
+    @JsonProperty
+    private final String lastName;
 
     @JsonProperty
     private final String email;

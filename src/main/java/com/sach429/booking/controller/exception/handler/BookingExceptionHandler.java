@@ -5,7 +5,6 @@ import com.sach429.booking.exception.*;
 import com.sach429.booking.types.BookingError;
 import com.sach429.booking.types.ErrorType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.classify.BinaryExceptionClassifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestControllerAdvice
 public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
@@ -107,8 +109,6 @@ public class BookingExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BookingModifyException.class)
     public ResponseEntity<BookingError> handleBookingModifyException(BookingModifyException bookingModifyException) {
-        BinaryExceptionClassifier binaryExceptionClassifier = new BinaryExceptionClassifier(Arrays.asList(BookingValidationException.class));
-        binaryExceptionClassifier.setTraverseCauses(true);
         BookingValidationException bookingValidationException = ExceptionUtils.throwableOfThrowable(bookingModifyException, BookingValidationException.class);
         if (bookingValidationException != null) {
             return handleBookingValidationException(bookingValidationException);

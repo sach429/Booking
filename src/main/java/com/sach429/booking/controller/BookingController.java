@@ -1,7 +1,5 @@
 package com.sach429.booking.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sach429.booking.exception.BookingCreationException;
 import com.sach429.booking.exception.BookingModifyException;
 import com.sach429.booking.exception.BookingNotFoundException;
@@ -9,7 +7,6 @@ import com.sach429.booking.model.Booking;
 import com.sach429.booking.service.BookingService;
 import com.sach429.booking.types.BookingCreate;
 import com.sach429.booking.types.BookingModify;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
@@ -56,19 +53,6 @@ public class BookingController {
             return bookingService.createBooking(bookingCreate);
         } catch (Exception e) {
             throw log.throwing(new BookingCreationException(e));
-        }
-    }
-
-    @Data
-    @JsonInclude(JsonInclude.Include.ALWAYS)
-    static class TestObject {
-        @JsonProperty
-        public List<LinkObject> links;
-
-        @Data
-        public static class LinkObject {
-            private List<String> rel;
-            private String href;
         }
     }
 

@@ -32,7 +32,7 @@ public class BookingValidationService {
                 .orElseThrow(() -> new BookingAlreadyCancelledException("Only confirmed booking can be modified"));
         Optional.of(booking)
                 .map(Booking::getFromDate)
-                .filter(LocalDate.now()::isAfter)
+                .filter(LocalDate.now()::isBefore)
                 .orElseThrow(() -> new BookingAlreadyInProgressException("Booking is already in progress and cannot be modified"));
     }
 
@@ -48,12 +48,12 @@ public class BookingValidationService {
         LocalDate toLocalDate, fromLocalDate;
 //        check if fromDate and toDate are in required format of yyyy-MM-dd
         try {
-            fromLocalDate = BookingUtils.convertStringToLocalDate(fromDate);
+            fromLocalDate = Optional.ofNullable(fromDate).map(BookingUtils::convertStringToLocalDate).orElseThrow(RuntimeException::new);
         } catch (Exception e) {
             throw new BookingDatesInvalidException("FromDate format is not valid");
         }
         try {
-            toLocalDate = BookingUtils.convertStringToLocalDate(toDate);
+            toLocalDate = Optional.ofNullable(toDate).map(BookingUtils::convertStringToLocalDate).orElseThrow(RuntimeException::new);
         } catch (Exception e) {
             throw new BookingDatesInvalidException("ToDate format is not valid");
         }
@@ -62,7 +62,7 @@ public class BookingValidationService {
         Optional.ofNullable(fromLocalDate)
                 .filter(date -> date.isBefore(toLocalDate) || date.isEqual(toLocalDate))
                 .filter(date -> date.until(toLocalDate).getDays() <= bookingConfigurationProperties.getMaxDuration() - 1)
-                .filter(date -> LocalDate.now().isAfter(date.plusDays(bookingConfigurationProperties.getMinDaysInAdvance())) || LocalDate.now().isEqual(date.plusDays(bookingConfigurationProperties.getMinDaysInAdvance())))
+                .filter(date -> date.isAfter(LocalDate.now().plusDays(bookingConfigurationProperties.getMinDaysInAdvance())) || date.isEqual(LocalDate.now().plusDays(bookingConfigurationProperties.getMinDaysInAdvance())))
                 .filter(date -> date.isBefore(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())) || date.isEqual(LocalDate.now().plusDays(bookingConfigurationProperties.getMaxDaysInAdvance())))
                 .orElseThrow(() -> new BookingDatesInvalidException("Booking Dates not in range"));
     }
@@ -76,8 +76,8 @@ public class BookingValidationService {
             if (bookingModify.getAction() == BookingModify.ActionType.MODIFY) {
                 if (StringUtils.isBlank(bookingModify.getFromDate()) || StringUtils.isBlank(bookingModify.getToDate()))
                     throw new BookingValidationException("FromDate and ToDate are required for modify request");
+                validateBookingDatesAreValid(bookingModify.getFromDate(), bookingModify.getToDate());
             }
-            validateBookingDatesAreValid(bookingModify.getFromDate(), bookingModify.getToDate());
             validateBookingIsConfirmedAndNotInProgress(bookingId);
         } catch (Exception e) {
             throw new BookingValidationException(e);

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookingRepository extends CrudRepository<Booking, ObjectId> {
 
-    @Query(value = "{'bookingId':?0}")
+    @Query(value = "{'bookingId':?0}", fields = "{changeLog:0, days:0}")
     Booking getBookingByBookingId(Long id);
 
 }

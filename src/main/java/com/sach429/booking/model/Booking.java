@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document(collection = "bookings")
@@ -43,6 +44,10 @@ public class Booking {
     private String cancellationReason;
 
     private List<String> days;
+
+    private LocalDateTime lastUpdateTimestamp;
+
+    private List<Booking> changeHistory;
 
     public enum BookingStatus {
         CANCELLED, CONFIRMED

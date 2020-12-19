@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class BookingPersistenceService {
     public static final String BOOKING_ID = "bookingId";
     public static final String EMAIL = "email";
     public static final String CANCELLATION_REASON = "cancellationReason";
+    public static final String LAST_UPDATE_TIMESTAMP = "lastUpdateTimestamp";
     private final BookingRepository bookingRepository;
     private final MongoTemplate mongoTemplate;
     private final BookingIdGenerationService bookingIdGenerationService;
@@ -68,6 +70,7 @@ public class BookingPersistenceService {
         List<String> days = getListOfDaysBetweenFromAndToDate(fromDate, toDate);
         Booking booking = new Booking(bookingId, bookingCreate.getFirstName(), bookingCreate.getLastName(), bookingCreate.getEmail(), fromDate, toDate, Booking.BookingStatus.CONFIRMED);
         booking.setDays(days);
+        booking.setLastUpdateTimestamp(LocalDateTime.now());
         bookingRepository.save(booking);
         return booking;
     }
@@ -86,7 +89,15 @@ public class BookingPersistenceService {
         Update update = new Update()
                 .set(FROM_DATE, fromDate)
                 .set(TO_DATE, toDate)
-                .set(DAYS, getListOfDaysBetweenFromAndToDate(fromDate, toDate));
+                .set(DAYS, getListOfDaysBetweenFromAndToDate(fromDate, toDate))
+                .set(LAST_UPDATE_TIMESTAMP, LocalDateTime.now());
+        Booking oldBooking = mongoTemplate.findAndModify(Query
+                        .query(Criteria
+                                .where(BOOKING_ID).
+                                        is(bookingId).andOperator(Criteria.where(BOOKING_STATUS).is(Booking.BookingStatus.CONFIRMED))),
+                update, FindAndModifyOptions.options().returnNew(false), Booking.class);
+        Optional.ofNullable(oldBooking).ifPresent(b -> b.setChangeHistory(null));
+        update = new Update().push("changeHistory", oldBooking);
         return mongoTemplate.findAndModify(Query
                         .query(Criteria
                                 .where(BOOKING_ID).
@@ -97,13 +108,20 @@ public class BookingPersistenceService {
     public Booking cancelBooking(BookingModify bookingModify, Long bookingId) {
         Update update = new Update()
                 .set(BOOKING_STATUS, Booking.BookingStatus.CANCELLED)
-                .set(CANCELLATION_REASON, bookingModify.getReason());
-        return mongoTemplate.findAndModify(Query
+                .set(CANCELLATION_REASON, bookingModify.getReason())
+                .set(LAST_UPDATE_TIMESTAMP, LocalDateTime.now());
+        Booking oldBooking = mongoTemplate.findAndModify(Query
                         .query(Criteria
                                 .where(BOOKING_ID).
                                         is(bookingId).andOperator(Criteria.where(BOOKING_STATUS).is(Booking.BookingStatus.CONFIRMED))),
+                update, FindAndModifyOptions.options().returnNew(false), Booking.class);
+        Optional.ofNullable(oldBooking).ifPresent(b -> b.setChangeHistory(null));
+        update = new Update().push("changeHistory", oldBooking);
+        return mongoTemplate.findAndModify(Query
+                        .query(Criteria
+                                .where(BOOKING_ID).
+                                        is(bookingId).andOperator(Criteria.where(BOOKING_STATUS).is(Booking.BookingStatus.CANCELLED))),
                 update, FindAndModifyOptions.options().returnNew(true), Booking.class);
-
     }
 
     public String getTransactionId() {

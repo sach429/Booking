@@ -18,36 +18,7 @@
     }
   },
   "required": [
-    "fromDate",
-    "toDate"
-  ],
-  "oneOf": [
-    {
-      "properties": {
-        "action": {
-          "enum": [
-            "modify"
-          ]
-        }
-      },
-      "required": [
-        "fromDate",
-        "toDate"
-      ]
-    },
-    {
-      "properties": {
-        "action": {
-          "enum": [
-            "cancel"
-          ]
-        }
-      },
-      "required": [
-        "fromDate",
-        "toDate"
-      ]
-    }
+    "action"
   ],
   "definitions": {
     "actionType": {

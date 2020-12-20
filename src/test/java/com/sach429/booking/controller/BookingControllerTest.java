@@ -198,6 +198,7 @@ public class BookingControllerTest {
         BookingModify bookingModify = new BookingModify();
         bookingModify.setFromDate("2020-12-20");
         bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
         when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException("cannot modify booking"));
         mockMvc.perform(put("/bookings/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -214,18 +215,36 @@ public class BookingControllerTest {
         BookingModify bookingModify = new BookingModify();
         bookingModify.setFromDate("2020-12-20");
         bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
         when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException(new BookingValidationException(new BookingNotFoundException("booking not found"))));
         mockMvc.perform(put("/bookings/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(bookingModify)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.errors[0].description").value(Matchers.containsStringIgnoringCase("booking not found")))
+                .andExpect(jsonPath("$.errors[0].description").value(Matchers.is("booking not found")))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
     public void testModifyBookingWhenEncounteredDatesNotAvailableException() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        BookingModify bookingModify = new BookingModify();
+        bookingModify.setFromDate("2020-12-20");
+        bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
+        when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException(new BookingValidationException(new BookingDateNotAvailableException("booking dates not available"))));
+        mockMvc.perform(put("/bookings/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(bookingModify)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].description").value(Matchers.is("booking dates not available")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    @Test
+    public void testModifyBookingWhenMissingRequiredField() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         BookingModify bookingModify = new BookingModify();
         bookingModify.setFromDate("2020-12-20");
@@ -236,7 +255,7 @@ public class BookingControllerTest {
                 .content(objectMapper.writeValueAsString(bookingModify)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors[0].description").value(Matchers.containsStringIgnoringCase("booking dates not available")))
+                .andExpect(jsonPath("$.errors[0].description").value(Matchers.is("action must not be null")))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
     }
 
@@ -246,6 +265,7 @@ public class BookingControllerTest {
         BookingModify bookingModify = new BookingModify();
         bookingModify.setFromDate("2020-12-22");
         bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
         when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException(new BookingValidationException(new BookingDatesInvalidException("booking dates not in range"))));
         mockMvc.perform(put("/bookings/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -253,6 +273,40 @@ public class BookingControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].description").value(Matchers.containsStringIgnoringCase("booking dates not in range")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    @Test
+    public void testModifyBookingWhenBookingAlreadyInProgress() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        BookingModify bookingModify = new BookingModify();
+        bookingModify.setFromDate("2020-12-22");
+        bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
+        when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException(new BookingValidationException(new BookingAlreadyInProgressException("booking already in progress"))));
+        mockMvc.perform(put("/bookings/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(bookingModify)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].description").value(Matchers.containsStringIgnoringCase("booking already in progress")))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
+    }
+
+    @Test
+    public void testModifyBookingWhenBookingAlreadyCancelled() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        BookingModify bookingModify = new BookingModify();
+        bookingModify.setFromDate("2020-12-22");
+        bookingModify.setToDate("2026-12-20");
+        bookingModify.setAction(BookingModify.ActionType.MODIFY);
+        when(bookingService.modifyBooking(any(BookingModify.class), anyLong())).thenThrow(new BookingModifyException(new BookingValidationException(new BookingAlreadyCancelledException("booking already cancelled"))));
+        mockMvc.perform(put("/bookings/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(bookingModify)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].description").value(Matchers.containsStringIgnoringCase("booking already cancelled")))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE.toString(), MediaType.APPLICATION_JSON_VALUE));
     }
 

@@ -28,7 +28,7 @@ public class BookingValidationService {
         Booking booking = bookingPersistenceService.getBooking(bookingId);
         Optional.ofNullable(booking)
                 .map(Booking::getBookingStatus)
-                .map(Booking.BookingStatus.CONFIRMED::equals)
+                .filter(Booking.BookingStatus.CONFIRMED::equals)
                 .orElseThrow(() -> new BookingAlreadyCancelledException("Only confirmed booking can be modified"));
         Optional.of(booking)
                 .map(Booking::getFromDate)

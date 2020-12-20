@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
-public class BookingPersistenceService {
+public class    BookingPersistenceService {
     public static final String YYYY_MM_DD = "yyyy-MM-dd";
     public static final String FROM_DATE = "fromDate";
     public static final String TO_DATE = "toDate";
